@@ -1,0 +1,13 @@
+D:\Downloads\domashnee-zadanie-no7-CelestialShepherd-master\Snake\bin\Debug\Snake.exe
+D:\Downloads\domashnee-zadanie-no7-CelestialShepherd-master\Snake\bin\Debug\Snake.pdb
+D:\Downloads\domashnee-zadanie-no7-CelestialShepherd-master\Snake\obj\x86\Debug\Snake.csprojAssemblyReference.cache
+D:\Downloads\domashnee-zadanie-no7-CelestialShepherd-master\Snake\obj\x86\Debug\MainWindow.baml
+D:\Downloads\domashnee-zadanie-no7-CelestialShepherd-master\Snake\obj\x86\Debug\MainWindow.g.cs
+D:\Downloads\domashnee-zadanie-no7-CelestialShepherd-master\Snake\obj\x86\Debug\App.g.cs
+D:\Downloads\domashnee-zadanie-no7-CelestialShepherd-master\Snake\obj\x86\Debug\Snake_MarkupCompile.cache
+D:\Downloads\domashnee-zadanie-no7-CelestialShepherd-master\Snake\obj\x86\Debug\Snake.g.resources
+D:\Downloads\domashnee-zadanie-no7-CelestialShepherd-master\Snake\obj\x86\Debug\Snake.Properties.Resources.resources
+D:\Downloads\domashnee-zadanie-no7-CelestialShepherd-master\Snake\obj\x86\Debug\Snake.Resources.resources
+D:\Downloads\domashnee-zadanie-no7-CelestialShepherd-master\Snake\obj\x86\Debug\Snake.csproj.GenerateResource.cache
+D:\Downloads\domashnee-zadanie-no7-CelestialShepherd-master\Snake\obj\x86\Debug\Snake.exe
+D:\Downloads\domashnee-zadanie-no7-CelestialShepherd-master\Snake\obj\x86\Debug\Snake.pdb

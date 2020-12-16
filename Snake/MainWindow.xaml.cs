@@ -15,9 +15,6 @@ using System.Windows.Threading;
 
 namespace Snake
 {
-    /// <summary>
-    /// Логика взаимодействия для MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         //Поле на котором живет змея
@@ -28,11 +25,23 @@ namespace Snake
         List<PositionedEntity> snake;
         // яблоко
         Apple apple;
+        // звезда
+        Star star;
         //количество очков
         int score;
-        //таймер по которому 
+        //таймер по которому осуществляется движение всех объектов
         DispatcherTimer moveTimer;
-        
+        //таймер по которому идёт действие звезды
+        DispatcherTimer starActiveTimer;
+        //таймер по которому идёт перезарядка звезды
+        DispatcherTimer starCooldownTimer;
+        //таймер по которому происходит исчезновение звезды
+        DispatcherTimer starDisappearTimer;
+        //множитель очков
+        int multiplier = 1;
+        //рандом для "честных" случайных чисел
+        static Random rand = new Random();
+
         //конструктор формы, выполняется при запуске программы
         public MainWindow()
         {
@@ -46,7 +55,21 @@ namespace Snake
             moveTimer = new DispatcherTimer();
             moveTimer.Interval = new TimeSpan(0, 0, 0, 0, 300);
             moveTimer.Tick += new EventHandler(moveTimer_Tick);
-            
+
+            //создаем таймер, отсчитывающий время действия звезды(срабатывающий раз в 30 cек.)
+            starActiveTimer = new DispatcherTimer();
+            starActiveTimer.Interval = new TimeSpan(0, 0, 0, 30, 0);
+            starActiveTimer.Tick += new EventHandler(starActiveTimer_Tick);
+
+            //создаем таймер, отсчитывающий время перезарядки звезды(срабатывающий раз в 20 cек.)
+            starCooldownTimer = new DispatcherTimer();
+            starCooldownTimer.Interval = new TimeSpan(0, 0, 0, 20, 0);
+            starCooldownTimer.Tick += new EventHandler(starCooldownTimer_Tick);
+
+            //создаем таймер, отсчитывающий время после которого звезда исчезает(срабатывающий раз в 5 cек.)
+            starDisappearTimer = new DispatcherTimer();
+            starDisappearTimer.Interval = new TimeSpan(0, 0, 0, 5, 0);
+            starDisappearTimer.Tick += new EventHandler(starDisappearTimer_Tick);
         }
 
         //метод перерисовывающий экран
@@ -62,7 +85,7 @@ namespace Snake
             //обновляем положение яблока
             Canvas.SetTop(apple.image, apple.y);
             Canvas.SetLeft(apple.image, apple.x);
-            
+
             //обновляем количество очков
             lblScore.Content = String.Format("{0}000", score);
         }
@@ -84,6 +107,9 @@ namespace Snake
                 {
                     //мы проиграли
                     moveTimer.Stop();
+                    starActiveTimer.Stop();
+                    starCooldownTimer.Stop();
+                    starDisappearTimer.Stop();
                     tbGameOver.Visibility = Visibility.Visible;
                     return;
                 }
@@ -94,15 +120,34 @@ namespace Snake
             {
                 //мы проиграли
                 moveTimer.Stop();
+                starActiveTimer.Stop();
+                starCooldownTimer.Stop();
+                starDisappearTimer.Stop();
                 tbGameOver.Visibility = Visibility.Visible;
                 return;
+            }
+
+            if (head.x == star.x && head.y == star.y)
+            {
+                //Убираем картинку
+                canvas1.Children.Remove(star.image);
+                //Перемещаем звезду за пределы игрового поля
+                star.x = 0;
+                star.y = 0;
+                //Делаем текст с действием бонуса видимым
+                lblBonus.Visibility = Visibility.Visible;
+                //Задаём множитель очков
+                multiplier = 10;
+                //Останавливаем
+                starDisappearTimer.Stop();
+                starActiveTimer.Start();
             }
 
             //проверяем, что голова змеи врезалась в яблоко
             if (head.x == apple.x && head.y == apple.y)
             {
                 //увеличиваем счет
-                score++;
+                score = score + 1 * multiplier;
                 //двигаем яблоко на новое место
                 apple.move();
                 // добавляем новый сегмент к змее
@@ -112,6 +157,40 @@ namespace Snake
             }
             //перерисовываем экран
             UpdateField();
+        }
+
+        void starActiveTimer_Tick(object sender, EventArgs e)
+        {
+            //Возвращаем множитель очков к нормальному значению
+            multiplier = 1;
+            //Делаем текст с действием бонуса невидимым
+            lblBonus.Visibility = Visibility.Hidden;
+            starCooldownTimer.Start();
+            starActiveTimer.Stop();
+        }
+
+        void starCooldownTimer_Tick(object sender, EventArgs e)
+        {
+            //Двигаем звезду на новое место
+            star.move();
+            //Добавляем изображение звезды на поле
+            canvas1.Children.Add(star.image);
+            //Обновляем положение звезды
+            Canvas.SetTop(star.image, star.y);
+            Canvas.SetLeft(star.image, star.x);
+            starCooldownTimer.Stop();
+            starDisappearTimer.Start();
+        }
+
+        void starDisappearTimer_Tick(object sender, EventArgs e)
+        {
+            //Убираем изображение звезды с поля
+            canvas1.Children.Remove(star.image);
+            //Перемещаем звезду за пределы игрового поля
+            star.x = 0;
+            star.y = 0;
+            starDisappearTimer.Stop();
+            starCooldownTimer.Start();
         }
 
         // Обработчик нажатия на кнопку клавиатуры
@@ -151,13 +230,18 @@ namespace Snake
             // создаем новое яблоко и добавлем его
             apple = new Apple(snake);
             canvas1.Children.Add(apple.image);
+            // создаем новую звезду(бонус х10)
+            star = new Star(snake);
+            //Убираем текст с действием бонуса, если он остался на экране
+            lblBonus.Visibility = Visibility.Hidden;
             // создаем голову
             head = new Head();
             snake.Add(head);
             canvas1.Children.Add(head.image);
             
-            //запускаем таймер
+            //запускаем таймеры движения и перезарядки звезды
             moveTimer.Start();
+            starCooldownTimer.Start();
             UpdateField();
 
         }
@@ -238,7 +322,37 @@ namespace Snake
 
             public override void move()
             {
-                Random rand = new Random();
+                do
+                {
+                    x = rand.Next(13) * 40 + 40;
+                    y = rand.Next(13) * 40 + 40;
+                    bool overlap = false;
+                    foreach (var p in m_snake)
+                    {
+                        if (p.x == x && p.y == y)
+                        {
+                            overlap = true;
+                            break;
+                        }
+                    }
+                    if (!overlap)
+                        break;
+                } while (true);
+
+            }
+        }
+
+        public class Star : PositionedEntity
+        {
+            List<PositionedEntity> m_snake;
+            public Star(List<PositionedEntity> s)
+                : base(0, 0, 40, 40, "pack://application:,,,/Resources/star.png")
+            {
+                m_snake = s;
+            }
+
+            public override void move()
+            {
                 do
                 {
                     x = rand.Next(13) * 40 + 40;
